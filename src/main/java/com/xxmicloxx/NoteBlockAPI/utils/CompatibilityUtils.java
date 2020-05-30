@@ -189,6 +189,7 @@ public class CompatibilityUtils {
 		soundPacket.getMinecraftKeys().write(0,
 				new MinecraftKey(sound.replaceFirst("minecraft:", "")));
 		soundPacket.getSoundCategories().write(0, EnumWrappers.SoundCategory.valueOf(category.name()));
+		location = MathUtils.stereoPan(location, distance);
 		soundPacket.getIntegers().write(0, (int) (location.getX() * 8.0D));
 		soundPacket.getIntegers().write(1, (int) (location.getY() * 8.0D));
 		soundPacket.getIntegers().write(2, (int) (location.getZ() * 8.0D));
