@@ -1,17 +1,26 @@
 package com.xxmicloxx.NoteBlockAPI.utils;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.reflect.FieldUtils;
+import com.comphenix.protocol.reflect.FuzzyReflection;
+import com.comphenix.protocol.reflect.accessors.Accessors;
+import com.comphenix.protocol.reflect.accessors.MethodAccessor;
+import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.EnumWrappers;
+import com.comphenix.protocol.wrappers.MinecraftKey;
+import com.xxmicloxx.NoteBlockAPI.NoteBlockAPI;
+import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
+import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-import com.xxmicloxx.NoteBlockAPI.model.CustomInstrument;
-import com.xxmicloxx.NoteBlockAPI.model.SoundCategory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Fields/methods for reflection &amp; version checking
@@ -168,7 +177,28 @@ public class CompatibilityUtils {
 	 */
 	public static void playSound(Player player, Location location, String sound,
 								 SoundCategory category, float volume, float pitch, float distance) {
-		playSoundUniversal(player, location, sound, category, volume, pitch, distance);
+		if (NoteBlockAPI.getAPI().hook == null)
+			playSoundUniversal(player, location, sound, category, volume, pitch, distance);
+		else
+			playSoundProtocolLib(player, location, sound, category, volume, pitch, distance);
+	}
+
+	private static void playSoundProtocolLib(Player player, Location location, String sound,
+											 SoundCategory category, float volume, float pitch, float distance) {
+		PacketContainer soundPacket = new PacketContainer(PacketType.Play.Server.CUSTOM_SOUND_EFFECT);
+		soundPacket.getMinecraftKeys().write(0,
+				new MinecraftKey(sound.replaceFirst("minecraft:", "")));
+		soundPacket.getSoundCategories().write(0, EnumWrappers.SoundCategory.valueOf(category.name()));
+		soundPacket.getIntegers().write(0, (int) (location.getX() * 8.0D));
+		soundPacket.getIntegers().write(1, (int) (location.getY() * 8.0D));
+		soundPacket.getIntegers().write(2, (int) (location.getZ() * 8.0D));
+		soundPacket.getFloat().write(0, volume);
+		soundPacket.getFloat().write(1, pitch);
+		try {
+			NoteBlockAPI.getAPI().hook.protocolManager.sendServerPacket(player, soundPacket);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException("Unable to send packet", e);
+		}
 	}
 
 	/**

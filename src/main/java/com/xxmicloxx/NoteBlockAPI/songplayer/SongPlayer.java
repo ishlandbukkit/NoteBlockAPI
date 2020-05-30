@@ -54,7 +54,7 @@ public abstract class SongPlayer {
 	com.xxmicloxx.NoteBlockAPI.SongPlayer oldSongPlayer;
 
 	public SongPlayer(Song song) {
-		this(new Playlist(song), SoundCategory.MASTER);
+		this(new Playlist(song), SoundCategory.RECORDS);
 	}
 
 	public SongPlayer(Song song, SoundCategory soundCategory) {
@@ -65,8 +65,8 @@ public abstract class SongPlayer {
 		this(new Playlist(song), soundCategory, random);
 	}
 	
-	public SongPlayer(Playlist playlist){
-		this(playlist, SoundCategory.MASTER);
+	public SongPlayer(Playlist playlist) {
+		this(playlist, SoundCategory.RECORDS);
 	}
 
 	public SongPlayer(Playlist playlist, SoundCategory soundCategory){
@@ -411,8 +411,8 @@ public abstract class SongPlayer {
 							continue;
 						}
 						CallUpdate("tick", tick);
-						
-						plugin.doSync(() -> {
+
+						final Runnable playTick = () -> {
 							for (UUID uuid : playerList.keySet()) {
 								Player player = Bukkit.getPlayer(uuid);
 								if (player == null) {
@@ -421,7 +421,11 @@ public abstract class SongPlayer {
 								}
 								playTick(player, tick);
 							}
-						});
+						};
+						if (plugin.hook == null)
+							plugin.doSync(playTick);
+						else
+							playTick.run();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

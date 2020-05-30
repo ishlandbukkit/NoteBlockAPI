@@ -1,5 +1,6 @@
 package com.xxmicloxx.NoteBlockAPI;
 
+import com.xxmicloxx.NoteBlockAPI.hooks.ProtocolLibHook;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.Updater;
@@ -26,16 +27,19 @@ import java.util.concurrent.ConcurrentHashMap;
 public class NoteBlockAPI extends JavaPlugin {
 
 	private static NoteBlockAPI plugin;
-	
+
 	private Map<UUID, ArrayList<SongPlayer>> playingSongs = new ConcurrentHashMap<UUID, ArrayList<SongPlayer>>();
 	private Map<UUID, Byte> playerVolume = new ConcurrentHashMap<UUID, Byte>();
 
 	private boolean disabling = false;
-	
+
 	private HashMap<Plugin, Boolean> dependentPlugins = new HashMap<>();
+
+	public ProtocolLibHook hook = null;
 
 	/**
 	 * Returns true if a Player is currently receiving a song
+	 *
 	 * @param player
 	 * @return is receiving a song
 	 */
@@ -135,19 +139,24 @@ public class NoteBlockAPI extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		plugin = this;
-		
-		for (Plugin pl : getServer().getPluginManager().getPlugins()){
-			if (pl.getDescription().getDepend().contains("NoteBlockAPI") || pl.getDescription().getSoftDepend().contains("NoteBlockAPI")){
+
+		for (Plugin pl : getServer().getPluginManager().getPlugins()) {
+			if (pl.getDescription().getDepend().contains("NoteBlockAPI") || pl.getDescription().getSoftDepend().contains("NoteBlockAPI")) {
 				dependentPlugins.put(pl, false);
 			}
 		}
-		
-		Metrics metrics = new Metrics(this);	
-		
+
+		if (getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
+			hook = new ProtocolLibHook();
+			getLogger().info("Hooked into ProtocolLib!");
+		}
+
+		Metrics metrics = new Metrics(this);
+
 		new NoteBlockPlayerMain().onEnable();
-		
+
 		getServer().getScheduler().runTaskLater(this, new Runnable() {
-			
+
 			@Override
 			public void run() {
 				Plugin[] plugins = getServer().getPluginManager().getPlugins();
