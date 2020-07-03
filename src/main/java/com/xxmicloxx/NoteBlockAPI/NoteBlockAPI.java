@@ -1,6 +1,5 @@
 package com.xxmicloxx.NoteBlockAPI;
 
-import com.xxmicloxx.NoteBlockAPI.hooks.ProtocolLibHook;
 import com.xxmicloxx.NoteBlockAPI.songplayer.SongPlayer;
 import com.xxmicloxx.NoteBlockAPI.utils.MathUtils;
 import com.xxmicloxx.NoteBlockAPI.utils.Updater;
@@ -34,8 +33,6 @@ public class NoteBlockAPI extends JavaPlugin {
 	private boolean disabling = false;
 
 	private HashMap<Plugin, Boolean> dependentPlugins = new HashMap<>();
-
-	public ProtocolLibHook hook = null;
 
 	/**
 	 * Returns true if a Player is currently receiving a song
@@ -144,11 +141,6 @@ public class NoteBlockAPI extends JavaPlugin {
 			if (pl.getDescription().getDepend().contains("NoteBlockAPI") || pl.getDescription().getSoftDepend().contains("NoteBlockAPI")) {
 				dependentPlugins.put(pl, false);
 			}
-		}
-
-		if (getServer().getPluginManager().getPlugin("ProtocolLib") != null) {
-			hook = new ProtocolLibHook();
-			getLogger().info("Hooked into ProtocolLib!");
 		}
 
 		Metrics metrics = new Metrics(this);

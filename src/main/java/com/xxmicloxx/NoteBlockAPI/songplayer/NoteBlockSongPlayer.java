@@ -99,7 +99,7 @@ public class NoteBlockSongPlayer extends RangeSongPlayer {
 
 			float volume = ((layer.getVolume() * (int) this.volume * (int) playerVolume * note.getVelocity()) / 100_00_00_00F)
 					* ((1F / 16F) * getDistance());
-			float pitch = NoteUtils.getPitch(note);
+			float pitch = NoteUtils.getPitchInOctave(note);
 
             channelMode.play(player, loc, song, layer, note, soundCategory, volume, !enable10Octave);
 

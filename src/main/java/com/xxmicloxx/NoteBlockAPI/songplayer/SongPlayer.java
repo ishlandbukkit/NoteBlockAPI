@@ -422,10 +422,8 @@ public abstract class SongPlayer {
 								playTick(player, tick);
 							}
 						};
-						if (plugin.hook == null)
-							plugin.doSync(playTick);
-						else
-							playTick.run();
+
+						playTick.run();
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
